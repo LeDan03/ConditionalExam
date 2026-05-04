@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currency Converter</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Currency Converter</h1>
+    <p class="subtitle">Convert between major world currencies</p>
+
+    <div class="error" id="errorMessage"></div>
+
+    <form id="converterForm">
+      <div class="currency-inputs">
+        <div class="currency-field">
+          <label for="amount">Amount</label>
+          <input 
+            type="number" 
+            id="amount" 
+            placeholder="Enter amount" 
+            value="1" 
+            min="0" 
+            step="0.01"
+            required
+          >
+        </div>
+
+        <div class="currency-field">
+          <label for="fromCurrency">From</label>
+          <select id="fromCurrency" required>
+            <option value="USD">USD - US Dollar</option>
+            <option value="EUR">EUR - Euro</option>
+            <option value="VND">VND - Vietnamese Dong</option>
+            <option value="AUD">AUD - Australian Dollar</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; text-align: center; align-items: center; justify-content: center; margin: 1px 0;">
+        <button type="button" class="swap-button" id="swapButton" title="Swap currencies">⇅</button>
+      </div>
+
+      <div class="currency-field">
+        <label for="toCurrency">To</label>
+        <select id="toCurrency" required>
+          <option value="USD">USD - US Dollar</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="VND">VND - Vietnamese Dong</option>
+          <option value="AUD">AUD - Australian Dollar</option>
+        </select>
+      </div>
+
+    </form>
+
+    <div class="result-section" id="resultSection">
+      <div class="result-label">Converted Amount</div>
+      <div class="result-value" id="resultValue">0.00</div>
+      <div class="exchange-rate" id="exchangeRateInfo"></div>
+    </div>
+  </div>
+
+  <script src="be.js"></script>
+  <script>
+    const form = document.getElementById('converterForm');
+    const amountInput = document.getElementById('amount');
+    const fromCurrency = document.getElementById('fromCurrency');
+    const toCurrency = document.getElementById('toCurrency');
+    const resultSection = document.getElementById('resultSection');
+    const resultValue = document.getElementById('resultValue');
+    const exchangeRateInfo = document.getElementById('exchangeRateInfo');
+    const errorMessage = document.getElementById('errorMessage');
+    const swapButton = document.getElementById('swapButton');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      performConversion();
+    });
+
+    amountInput.addEventListener('input', performConversion);
+    fromCurrency.addEventListener('change', performConversion);
+    toCurrency.addEventListener('change', performConversion);
+
+    swapButton.addEventListener('click', () => {
+      const temp = fromCurrency.value;
+      fromCurrency.value = toCurrency.value;
+      toCurrency.value = temp;
+      performConversion();
+    });
+
+    function performConversion() {
+      const amount = parseFloat(amountInput.value);
+      const from = fromCurrency.value;
+      const to = toCurrency.value;
+
+      if (isNaN(amount) || amount === '') {
+        resultSection.classList.remove('active');
+        errorMessage.classList.remove('active');
+        return;
+      }
+
+      const result = convertCurrency(amount, from, to);
+
+      if (typeof result === 'string' && result.includes('Error')) {
+        errorMessage.textContent = result;
+        errorMessage.classList.add('active');
+        resultSection.classList.remove('active');
+      } else {
+        errorMessage.classList.remove('active');
+        resultValue.textContent = result.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+        const rate = getExchangeRate(from, to);
+        exchangeRateInfo.textContent = `Exchange Rate: 1 ${from} = ${rate} ${to}`;
+
+        resultSection.classList.add('active');
+      }
+    }
+
+    performConversion();
+  </script>
+</body>
+</html>
